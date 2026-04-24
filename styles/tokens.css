@@ -1,0 +1,103 @@
+/*
+ * Design tokens — ported from DESIGN.md §2–4.
+ * All colours, spacing, typography sizes live here. Never hardcode values in components.
+ * Light theme is the base; [data-theme="dark"] overrides on <html>.
+ */
+
+:root {
+  /* Surfaces — light (cream) */
+  --cream: #f2eee3;
+  --cream-soft: #f7f4ec;
+  --cream-2: #eae4d4;
+
+  /* Ink — light */
+  --ink: #1a1816;
+  --ink-2: #2a2622;
+  --ink-mute: #6b635a;
+  --ink-faint: #a89f90;
+
+  /* Lines — light */
+  --line: rgba(26, 24, 22, 0.12);
+  --line-strong: rgba(26, 24, 22, 0.22);
+
+  /* Accent — electric blue (light) */
+  --accent: oklch(0.58 0.18 248);
+  --accent-soft: oklch(0.58 0.18 248 / 0.16);
+  --accent-ink: oklch(0.28 0.12 248);
+
+  /* Signals */
+  --green: oklch(0.72 0.18 148);
+
+  /* Stable (theme-invariant) — the literal ink/cream/accent; used where a
+     surface or button must not flip with the theme (e.g. the accent CTA text
+     must stay light for contrast against the blue fill regardless of mode). */
+  --ink-stable: #1a1816;
+  --cream-stable: #f2eee3;
+  --accent-stable: oklch(0.58 0.18 248);
+  --accent-stable-hover: oklch(0.32 0.15 248);
+
+  /* Grain */
+  --grain-opacity: 0.5;
+  --grain-blend: normal;
+
+  /* Typography scale — next/font injects --font-instrument, --font-geist, --font-mono-jetbrains */
+  --font-display: var(--font-instrument), "Times New Roman", serif;
+  --font-sans: var(--font-geist), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono-jetbrains), ui-monospace, "SF Mono", monospace;
+
+  --text-hero: clamp(3.5rem, 10vw, 9.25rem);
+  --text-h1: clamp(3.5rem, 9vw, 7.5rem);
+  --text-h2: clamp(2.5rem, 6vw, 4.75rem);
+  --text-h3: clamp(1.875rem, 3vw, 2.25rem);
+  --text-body: clamp(1rem, 1.1vw, 1.125rem);
+  --text-micro: 0.6875rem;
+
+  --tracking-hero: -0.025em;
+  --tracking-h1: -0.02em;
+  --tracking-h2: -0.02em;
+  --tracking-micro: 0.32em;
+
+  --leading-body: 1.6;
+
+  /* Layout */
+  --container-max: 1320px;
+  --container-pad: clamp(1.25rem, 4vw, 3rem);
+  --section-pad-y: clamp(4rem, 10vh, 8rem);
+  --grid-gap: clamp(1rem, 2vw, 1.5rem);
+
+  /* Radii — 2px only, no pills */
+  --radius: 2px;
+  --radius-lg: 2px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-quick: 180ms;
+  --dur-base: 300ms;
+  --dur-slow: 500ms;
+}
+
+:root[data-theme="dark"] {
+  /* Surfaces — dark (charcoal) */
+  --cream: #141210;
+  --cream-soft: #1a1815;
+  --cream-2: #1c1a17;
+
+  /* Ink — dark */
+  --ink: #eee8d9;
+  --ink-2: #d9d2c0;
+  --ink-mute: #938a7b;
+  --ink-faint: #5f574c;
+
+  /* Lines — dark */
+  --line: rgba(238, 232, 217, 0.12);
+  --line-strong: rgba(238, 232, 217, 0.22);
+
+  /* Accent — electric blue (dark) */
+  --accent: oklch(0.72 0.17 248);
+  --accent-soft: oklch(0.72 0.17 248 / 0.18);
+  --accent-ink: oklch(0.8 0.14 248);
+
+  /* Grain — softened + screen blend on dark */
+  --grain-opacity: 0.35;
+  --grain-blend: screen;
+}

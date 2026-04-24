@@ -6,60 +6,28 @@ For the full spec of any feature, see `context/features/[feature-name].md`.
 
 ---
 
-## Active feature: home-phase-1-shell
+## Active feature
 
-**Status:** In Progress (started 2026-04-24)
-**Spec:** [./features/home-phase-1-shell.md](./features/home-phase-1-shell.md)
-**Branch:** `feat/home-phase-1-shell`
+_None — ready to pick up the next one._
 
-### Goals
-
-- Root layout (`app/layout.tsx`) with font loading and theme setup
-- `(marketing)` route group with its own layout for nav + footer
-- Nav component — sticky top, three columns, backdrop-blur, WhatsApp CTA
-- Footer component — four-column desktop with brand block and tagline repeat
-- Theme toggle — light/dark switch, persists via `localStorage`, respects `prefers-color-scheme` on first visit
-- Inline theme script in `<head>` to prevent flash-of-wrong-theme
-- Grain overlay via `body::before` (SVG turbulence, blended per theme)
-- Self-hosted fonts via `next/font`: Instrument Serif, Geist, JetBrains Mono
-- Global CSS tokens from `DESIGN.md` §2 ported into `styles/tokens.css`
-- Design system primitives: `Button`, `Container`, `Section`, `MicroLabel`
-
-### Acceptance criteria
-
-- [ ] Light and dark themes both render correctly; no hardcoded colours
-- [ ] Theme toggle works and persists across reloads
-- [ ] First visit respects `prefers-color-scheme`
-- [ ] No flash of wrong theme on load
-- [ ] Nav is keyboard-reachable; WhatsApp CTA opens `wa.me/60164609428` in a new tab
-- [ ] Footer renders on all routes (lives in `(marketing)` layout)
-- [ ] Grain overlay visible on both themes
-- [ ] All three fonts self-hosted, no CDN requests
-- [ ] Lighthouse score on a blank page ≥ 98
-
-### Notes
-
-- Theme toggle stores `theme` in `localStorage`; inline script reads it (or `matchMedia` fallback) and sets `data-theme` on `<html>` before hydration
-- Tokens defined once in `tokens.css` — never hardcode oklch/hex in components
-- Grain SVG inlined as a data URI on `body::before` — no separate asset fetch
-- Nav backdrop-blur needs a solid colour fallback
-- WhatsApp dot uses `green` colour and a 2s pulse animation (spec in `DESIGN.md` §7)
-- Out of scope: home page content (Phases 2 and 3), contact form, blog content
-
-**Done when:** Any page renders with working nav + footer + theme toggle + grain, in both themes, with no FOUC, and Lighthouse is green on a scaffolded blank page.
+First feature to pick up: `home-phase-2-hero.md`.
 
 ---
 
 ## Finished features (reverse chronological)
 
-_None yet. Entries below will be added as features ship. Format per entry:_
-
-```
-### [feature-name] — shipped YYYY-MM-DD
-One-line summary of what landed.
-PR / commit: [link or SHA]
-Notes: [anything future sessions should know — gotchas, deviations from spec, tech-debt logged]
-```
+### home-phase-1-shell — shipped 2026-04-24
+Scaffolded Next.js 16 + React 19.2 + Tailwind v4 and shipped the app shell: nav, footer, theme toggle (persisted, respects `prefers-color-scheme`, no FOUC), grain overlay, self-hosted fonts, DESIGN.md §2 tokens, and the core primitives (Container, Section, MicroLabel, Button).
+Commit: `f48a329`
+Notes:
+- `reactCompiler` moved to the top-level `next.config.ts` in Next 16 (out of `experimental`); needs `babel-plugin-react-compiler` as a devDep.
+- `next lint` was removed in Next 16; the `lint` script uses `eslint .` with the flat export of `eslint-config-next`.
+- Theme toggle is state-free — the inline `<ThemeScript>` sets `data-theme` on `<html>` before hydration; CSS selectors drive which icon shows. This avoids the `react-hooks/set-state-in-effect` rule and any SSR/CSR mismatch.
+- Base element styles (`body`, `a`, etc.) must live inside `@layer base` — otherwise unlayered rules beat Tailwind's utility classes and every `text-*` hover silently dies. If a future component looks like its `text-ink` isn't applying, check you didn't add an unlayered base rule.
+- Button `primary` and `accent` variants are pinned to theme-stable tokens (`--ink-stable`, `--cream-stable`, `--accent-stable`) so CTAs don't invert with the theme. `ghost` deliberately flips.
+- Footer is pinned to `--ink-stable` / `--cream-stable`. Per DESIGN.md §5 it's an "ink surface" — it stays dark in both themes rather than inverting.
+- Tagline removed from the footer brand block; `em-accent` on `--accent-ink` is unreadable on an ink surface.
+- `/services`, `/work`, `/about`, `/blog`, `/contact` nav links lead to non-existent pages (expected 404s) until their feature phases land.
 
 ---
 
@@ -67,20 +35,19 @@ Notes: [anything future sessions should know — gotchas, deviations from spec, 
 
 Build the 14 features in this order. Each links to its spec file in `context/features/`.
 
-1. **[home-phase-1-shell](./features/home-phase-1-shell.md)** — nav, footer, theme toggle, grain, fonts, tokens, primitives
-2. **[home-phase-2-hero](./features/home-phase-2-hero.md)** — cursor-reactive dot grid + tagline + CTA
-3. **[home-phase-3-sections](./features/home-phase-3-sections.md)** — services grid, pipeline, selected work, CTA band
-4. **[services](./features/services.md)** — full services page
-5. **[work-index](./features/work-index.md)** — case study index with thumbnails
-6. **[case-study-phase-1-template](./features/case-study-phase-1-template.md)** — template + Sofie
-7. **[case-study-phase-2-remaining](./features/case-study-phase-2-remaining.md)** — BizzFlow → Ads
-8. **[about](./features/about.md)** — about page
-9. **[contact](./features/contact.md)** — contact form + Resend
-10. **[blog-phase-1-infra](./features/blog-phase-1-infra.md)** — MDX pipeline + first post
-11. **[blog-phase-2-posts](./features/blog-phase-2-posts.md)** — posts 2 and 3
-12. **[404](./features/404.md)** — custom error page
-13. **[seo-polish](./features/seo-polish.md)** — metadata, JSON-LD, sitemap, OG images across all pages
-14. **[launch](./features/launch.md)** — performance audit, reduced-motion, DNS cutover, GSC
+1. **[home-phase-2-hero](./features/home-phase-2-hero.md)** — cursor-reactive dot grid + tagline + CTA
+2. **[home-phase-3-sections](./features/home-phase-3-sections.md)** — services grid, pipeline, selected work, CTA band
+3. **[services](./features/services.md)** — full services page
+4. **[work-index](./features/work-index.md)** — case study index with thumbnails
+5. **[case-study-phase-1-template](./features/case-study-phase-1-template.md)** — template + Sofie
+6. **[case-study-phase-2-remaining](./features/case-study-phase-2-remaining.md)** — BizzFlow → Ads
+7. **[about](./features/about.md)** — about page
+8. **[contact](./features/contact.md)** — contact form + Resend
+9. **[blog-phase-1-infra](./features/blog-phase-1-infra.md)** — MDX pipeline + first post
+10. **[blog-phase-2-posts](./features/blog-phase-2-posts.md)** — posts 2 and 3
+11. **[404](./features/404.md)** — custom error page
+12. **[seo-polish](./features/seo-polish.md)** — metadata, JSON-LD, sitemap, OG images across all pages
+13. **[launch](./features/launch.md)** — performance audit, reduced-motion, DNS cutover, GSC
 
 ---
 

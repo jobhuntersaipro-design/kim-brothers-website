@@ -8,9 +8,28 @@ For the full spec of any feature, see `context/features/[feature-name].md`.
 
 ## Active feature
 
-_None — ready to pick up the next one._
+### home-phase-2-hero — started 2026-04-30
+**Status:** In Progress
+**Spec:** [`context/features/home-phase-2-hero.md`](./features/home-phase-2-hero.md)
 
-First feature to pick up: `home-phase-2-hero.md`.
+Cursor-reactive dot grid canvas hero with tagline + primary CTA. Highest-risk feature of the build — LCP must stay under 1.5s and the canvas must hit 60fps without triggering layout.
+
+**Goals**
+- Ship `HeroCanvas`: 26px DPR-aware dot grid, ambient sine drift, cursor displacement (160px radius, 1.4→4.0px, accent shift, up to 14px ray displacement) — single rAF loop, ~60 LOC, zero deps.
+- Static fallback on `(hover: none)` and `prefers-reduced-motion: reduce`.
+- Hero content layer: `S T A R T   H E R E` micro-label, display h1 "Focus on *growing*, not doing." (italic + `--accent-ink` on "growing"), supporting paragraph, WhatsApp CTA → `wa.me/60164609428`.
+- Reserve canvas space so mount doesn't shift content (CLS ≤ 0.05).
+- LCP ≤ 1.5s on 4G-throttled mobile; no layout events in the animation loop.
+
+**Notes / constraints**
+- H1 uses `clamp(56px, 10vw, 148px)` per DESIGN.md §3.
+- Canvas needs `width`/`height` attributes set to DPR-scaled values, CSS controls display size.
+- Pre-allocate dot positions in a `Float32Array` (x, y, ox, oy per dot); reuse each frame.
+- Use squared distance for the hot-path radius check.
+- Use `ResizeObserver` for viewport changes — recompute dims, not the full grid each frame.
+- `components/hero-canvas.tsx` and `components/hero.tsx` are new; `app/(marketing)/page.tsx` renders `<Hero />` first with other sections stubbed.
+- Component is client-only (`"use client"`).
+- Out of scope: services grid / pipeline / selected work (Phase 3), h1 entrance animation, any non-cursor canvas interaction.
 
 ---
 
@@ -35,19 +54,18 @@ Notes:
 
 Build the 14 features in this order. Each links to its spec file in `context/features/`.
 
-1. **[home-phase-2-hero](./features/home-phase-2-hero.md)** — cursor-reactive dot grid + tagline + CTA
-2. **[home-phase-3-sections](./features/home-phase-3-sections.md)** — services grid, pipeline, selected work, CTA band
-3. **[services](./features/services.md)** — full services page
-4. **[work-index](./features/work-index.md)** — case study index with thumbnails
-5. **[case-study-phase-1-template](./features/case-study-phase-1-template.md)** — template + Sofie
-6. **[case-study-phase-2-remaining](./features/case-study-phase-2-remaining.md)** — BizzFlow → Ads
-7. **[about](./features/about.md)** — about page
-8. **[contact](./features/contact.md)** — contact form + Resend
-9. **[blog-phase-1-infra](./features/blog-phase-1-infra.md)** — MDX pipeline + first post
-10. **[blog-phase-2-posts](./features/blog-phase-2-posts.md)** — posts 2 and 3
-11. **[404](./features/404.md)** — custom error page
-12. **[seo-polish](./features/seo-polish.md)** — metadata, JSON-LD, sitemap, OG images across all pages
-13. **[launch](./features/launch.md)** — performance audit, reduced-motion, DNS cutover, GSC
+1. **[home-phase-3-sections](./features/home-phase-3-sections.md)** — services grid, pipeline, selected work, CTA band
+2. **[services](./features/services.md)** — full services page
+3. **[work-index](./features/work-index.md)** — case study index with thumbnails
+4. **[case-study-phase-1-template](./features/case-study-phase-1-template.md)** — template + Sofie
+5. **[case-study-phase-2-remaining](./features/case-study-phase-2-remaining.md)** — BizzFlow → Ads
+6. **[about](./features/about.md)** — about page
+7. **[contact](./features/contact.md)** — contact form + Resend
+8. **[blog-phase-1-infra](./features/blog-phase-1-infra.md)** — MDX pipeline + first post
+9. **[blog-phase-2-posts](./features/blog-phase-2-posts.md)** — posts 2 and 3
+10. **[404](./features/404.md)** — custom error page
+11. **[seo-polish](./features/seo-polish.md)** — metadata, JSON-LD, sitemap, OG images across all pages
+12. **[launch](./features/launch.md)** — performance audit, reduced-motion, DNS cutover, GSC
 
 ---
 

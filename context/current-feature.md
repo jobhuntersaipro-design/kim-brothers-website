@@ -8,32 +8,24 @@ For the full spec of any feature, see `context/features/[feature-name].md`.
 
 ## Active feature
 
-### home-phase-2-hero — started 2026-04-30
-**Status:** In Progress
-**Spec:** [`context/features/home-phase-2-hero.md`](./features/home-phase-2-hero.md)
+_None — ready to pick up the next one._
 
-Cursor-reactive dot grid canvas hero with tagline + primary CTA. Highest-risk feature of the build — LCP must stay under 1.5s and the canvas must hit 60fps without triggering layout.
-
-**Goals**
-- Ship `HeroCanvas`: 26px DPR-aware dot grid, ambient sine drift, cursor displacement (160px radius, 1.4→4.0px, accent shift, up to 14px ray displacement) — single rAF loop, ~60 LOC, zero deps.
-- Static fallback on `(hover: none)` and `prefers-reduced-motion: reduce`.
-- Hero content layer: `S T A R T   H E R E` micro-label, display h1 "Focus on *growing*, not doing." (italic + `--accent-ink` on "growing"), supporting paragraph, WhatsApp CTA → `wa.me/60164609428`.
-- Reserve canvas space so mount doesn't shift content (CLS ≤ 0.05).
-- LCP ≤ 1.5s on 4G-throttled mobile; no layout events in the animation loop.
-
-**Notes / constraints**
-- H1 uses `clamp(56px, 10vw, 148px)` per DESIGN.md §3.
-- Canvas needs `width`/`height` attributes set to DPR-scaled values, CSS controls display size.
-- Pre-allocate dot positions in a `Float32Array` (x, y, ox, oy per dot); reuse each frame.
-- Use squared distance for the hot-path radius check.
-- Use `ResizeObserver` for viewport changes — recompute dims, not the full grid each frame.
-- `components/hero-canvas.tsx` and `components/hero.tsx` are new; `app/(marketing)/page.tsx` renders `<Hero />` first with other sections stubbed.
-- Component is client-only (`"use client"`).
-- Out of scope: services grid / pipeline / selected work (Phase 3), h1 entrance animation, any non-cursor canvas interaction.
+First feature to pick up: `home-phase-3-sections.md`.
 
 ---
 
 ## Finished features (reverse chronological)
+
+### home-phase-2-hero — shipped 2026-04-30
+Built the cursor-reactive dot grid canvas hero plus the content layer (h1 with italic accent on *growing*, supporting paragraph, WhatsApp + work CTAs). Eyebrow micro-label dropped before merge — the h1 carries enough weight on its own.
+Commit: `8a24e93`
+Notes:
+- Single rAF loop, two-pass render (base ink-faint dots, then accent-coloured cursor dots) keeps `fillStyle` writes to two per frame instead of one per dot.
+- Pointer is tracked at `window` level (not on the canvas) so the canvas wrapper stays `pointer-events-none` and never blocks the WhatsApp CTA layered above it.
+- Theme palette is re-read via a `MutationObserver` on `data-theme` so the dot/accent colours flip with the theme toggle without remount.
+- `(hover: none)` and `prefers-reduced-motion: reduce` share the static-fallback branch — paint once, no rAF, no listeners.
+- Section reserves `min-h-[min(900px,90svh)]` up-front to keep CLS at zero when the client canvas mounts.
+- Decided to defer all extra reveal/magnetic-CTA animation until after Phase 3 so we land the sections first and motion gets layered in once.
 
 ### home-phase-1-shell — shipped 2026-04-24
 Scaffolded Next.js 16 + React 19.2 + Tailwind v4 and shipped the app shell: nav, footer, theme toggle (persisted, respects `prefers-color-scheme`, no FOUC), grain overlay, self-hosted fonts, DESIGN.md §2 tokens, and the core primitives (Container, Section, MicroLabel, Button).

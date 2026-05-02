@@ -25,7 +25,7 @@ type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 const base =
   "inline-flex items-center gap-2 px-5 py-3 rounded-[var(--radius)] " +
-  "font-mono text-[12px] uppercase tracking-[0.22em] " +
+  "font-mono text-[12px] uppercase tracking-(--tracking-mono) " +
   "transition-transform duration-[var(--dur-base)] ease-[var(--ease-out)] " +
   "hover:-translate-y-[1px] focus-visible:outline-2 focus-visible:outline-accent " +
   "focus-visible:outline-offset-2";

@@ -164,6 +164,163 @@ html[data-theme="dark"] .theme-icon-light {
   display: none;
 }
 
+/*
+ * Scroll-reveal — applied via the <Reveal> client wrapper. Components are SSRed
+ * with no `data-reveal` attribute, so the markup is fully visible without JS;
+ * the hook only adds `pending` (hidden) once it has confirmed the element is
+ * below the fold and motion is allowed.
+ */
+.reveal {
+  transition:
+    opacity 800ms var(--ease-out),
+    transform 800ms var(--ease-out);
+  will-change: opacity, transform;
+}
+.reveal[data-reveal="pending"] {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.reveal[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+}
+
+/*
+ * Pipeline section — five-node row, hairline connector, accent pulse sweeping
+ * left-to-right. The pulse-track is a CSS container so the keyframe can use
+ * `100cqi` to span the full track width with a `transform`-only animation.
+ */
+.pipeline-connector {
+  position: absolute;
+  top: 6px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: var(--line-strong);
+  z-index: 0;
+}
+
+/*
+ * Pulse-track spans the full pipeline-track (not just the hairline range).
+ * The pulse keyframe fades in 0%→10% and out 90%→100%, so opacity-1 occurs
+ * exactly while the pulse is over the dot row (10%–90% of pipeline-track).
+ * Node-glow `animation-delay = node-i * 1.04s` aligns its peak (at 10%–12%
+ * of the node animation) with the pulse arriving at that node.
+ */
+.pipeline-pulse-track {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: 1;
+  pointer-events: none;
+  container-type: inline-size;
+}
+
+.pipeline-pulse {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 18px var(--accent-soft);
+  opacity: 0;
+}
+
+.pipeline-track.is-animating .pipeline-pulse {
+  animation: pipeline-sweep 5.2s linear infinite;
+}
+
+@keyframes pipeline-sweep {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100cqi - 8px));
+    opacity: 0;
+  }
+}
+
+/*
+ * Node dots — base ink fill, with a synchronized glow that fires when the
+ * sweep pulse passes each node. Each node gets `--node-i` (0..4) inline so
+ * the animation-delay slots into the right time window. Five nodes, 5.2s
+ * cycle = 1.04s per node; the glow keyframes are a narrow band around the
+ * pulse arrival.
+ */
+.pipeline-node-dot {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ink);
+  transition: background-color 240ms var(--ease-out);
+  will-change: transform, background-color;
+}
+
+@media (min-width: 768px) {
+  .pipeline-track.is-animating .pipeline-node-dot {
+    animation: pipeline-node-glow 5.2s linear infinite;
+    animation-delay: calc(var(--node-i, 0) * 1.04s);
+  }
+}
+
+@keyframes pipeline-node-glow {
+  0%,
+  6%,
+  16%,
+  100% {
+    transform: scale(1);
+    background-color: var(--ink);
+    box-shadow: none;
+  }
+  10%,
+  12% {
+    transform: scale(1.6);
+    background-color: var(--accent);
+    box-shadow: 0 0 18px var(--accent-soft);
+  }
+}
+
+/* Variant swap fade for the active pipeline */
+.pipeline-fade {
+  animation: pipeline-fade-in 320ms var(--ease-out) both;
+}
+
+@keyframes pipeline-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * Route-level View Transitions — paired with `experimental.viewTransition: true`
+ * and the <ViewTransition> wrapper in app/(marketing)/layout.tsx. The browser
+ * cross-fades the old/new tree on every navigation; we just shape the timing
+ * to match the rest of the motion system.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 380ms;
+  animation-timing-function: var(--ease-out);
+}
+
 /* Respect reduced-motion: freeze infinite/ambient loops */
 @media (prefers-reduced-motion: reduce) {
   *,

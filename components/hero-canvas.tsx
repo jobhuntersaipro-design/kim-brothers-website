@@ -11,6 +11,14 @@ const MAX_R = 4.0;
 const PUSH = 14;
 const DRIFT = 0.8;
 
+// Pulse-mode constants — the synthetic "wave" sweep used on no-hover devices.
+// One sweep across the canvas every PULSE_CYCLE_MS, with the wave visible for
+// PULSE_SWEEP_MS of that. The remainder is a quiet pause so the motion reads
+// as "ambient" rather than a constant scroll.
+const PULSE_CYCLE_MS = 5000;
+const PULSE_SWEEP_MS = 3500;
+const PULSE_BAND = 90; // half-width of the affected vertical band, px
+
 export function HeroCanvas({ className }: { className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,6 +39,7 @@ export function HeroCanvas({ className }: { className?: string }) {
     let cursorX = -9999;
     let cursorY = -9999;
     let rafId = 0;
+    let pulseMode = false; // true on no-hover devices when motion is allowed
     let dotColor = "#a89f90";
     let accentColor = "oklch(0.58 0.18 248)";
 
@@ -41,8 +50,6 @@ export function HeroCanvas({ className }: { className?: string }) {
       if (a) accentColor = a;
       if (d) dotColor = d;
     };
-
-    const isStatic = () => reduceMQ.matches || noHoverMQ.matches;
 
     const buildGrid = () => {
       const cols = Math.ceil(width / CELL) + 2;
@@ -87,38 +94,77 @@ export function HeroCanvas({ className }: { className?: string }) {
     const tick = (t: number) => {
       ctx.clearRect(0, 0, width, height);
       const time = t / 1000;
-      // Pass 1: base dots — skip those inside the cursor radius so the second
-      // pass can repaint them in accent without overdraw.
+
+      // Pulse mode drives a vertical sweep line across the canvas, treating
+      // the dot's distance from that line (1D, x only) as the "affected"
+      // metric. Cursor mode keeps the original radial check around the real
+      // pointer position. Both share the dot loop below — only the
+      // is-affected predicate and the highlight transform differ.
+      let pulseX = -9999;
+      let pulseActive = false;
+      if (pulseMode) {
+        const phase = t % PULSE_CYCLE_MS;
+        if (phase < PULSE_SWEEP_MS) {
+          const progress = phase / PULSE_SWEEP_MS;
+          // Sweep starts off-screen left, ends off-screen right.
+          pulseX = -PULSE_BAND + progress * (width + 2 * PULSE_BAND);
+          pulseActive = true;
+        }
+      }
+
+      // Pass 1: base dots — skip the affected ones; the second pass repaints
+      // them in accent without overdraw.
       ctx.fillStyle = dotColor;
       for (let i = 0; i < dots.length; i += 2) {
         const phase = i * 0.013;
         const x = dots[i] + Math.sin(time + phase) * DRIFT;
         const y = dots[i + 1] + Math.cos(time * 1.1 + phase) * DRIFT;
-        const dx = cursorX - x;
-        const dy = cursorY - y;
-        if (dx * dx + dy * dy < RADIUS_SQ) continue;
+        let affected = false;
+        if (pulseMode) {
+          if (pulseActive && Math.abs(x - pulseX) < PULSE_BAND) affected = true;
+        } else {
+          const dx = cursorX - x;
+          const dy = cursorY - y;
+          if (dx * dx + dy * dy < RADIUS_SQ) affected = true;
+        }
+        if (affected) continue;
         ctx.beginPath();
         ctx.arc(x, y, MIN_R, 0, Math.PI * 2);
         ctx.fill();
       }
-      // Pass 2: cursor-affected dots — accent fill, grown radius, pushed along ray.
+
+      // Pass 2: highlighted dots — accent fill, scaled radius. Cursor mode
+      // also pushes the dot outward along the ray; pulse mode skips the
+      // displacement (no clear ray direction for a vertical sweep).
       ctx.fillStyle = accentColor;
       for (let i = 0; i < dots.length; i += 2) {
         const phase = i * 0.013;
         const bx = dots[i] + Math.sin(time + phase) * DRIFT;
         const by = dots[i + 1] + Math.cos(time * 1.1 + phase) * DRIFT;
-        const dx = cursorX - bx;
-        const dy = cursorY - by;
-        const distSq = dx * dx + dy * dy;
-        if (distSq >= RADIUS_SQ) continue;
-        const dist = Math.sqrt(distSq);
-        const k = 1 - dist / RADIUS;
-        const r = MIN_R + (MAX_R - MIN_R) * k;
-        const px = dist > 0.001 ? bx - (dx / dist) * PUSH * k : bx;
-        const py = dist > 0.001 ? by - (dy / dist) * PUSH * k : by;
-        ctx.beginPath();
-        ctx.arc(px, py, r, 0, Math.PI * 2);
-        ctx.fill();
+        if (pulseMode) {
+          if (!pulseActive) continue;
+          const dx = bx - pulseX;
+          const absDx = Math.abs(dx);
+          if (absDx >= PULSE_BAND) continue;
+          const k = 1 - absDx / PULSE_BAND;
+          const r = MIN_R + (MAX_R - MIN_R) * k;
+          ctx.beginPath();
+          ctx.arc(bx, by, r, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          const dx = cursorX - bx;
+          const dy = cursorY - by;
+          const distSq = dx * dx + dy * dy;
+          if (distSq >= RADIUS_SQ) continue;
+          const dist = Math.sqrt(distSq);
+          const k = 1 - dist / RADIUS;
+          const r = MIN_R + (MAX_R - MIN_R) * k;
+          const px = dist > 0.001 ? bx - (dx / dist) * PUSH * k : bx;
+          const py = dist > 0.001 ? by - (dy / dist) * PUSH * k : by;
+          ctx.beginPath();
+          ctx.arc(px, py, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
       rafId = requestAnimationFrame(tick);
     };
@@ -151,18 +197,32 @@ export function HeroCanvas({ className }: { className?: string }) {
       }
     };
 
+    // Three modes, picked from the active media queries:
+    //   1. reduced motion → fully static (paint once, no rAF)
+    //   2. no hover (touch) → pulse mode (rAF, synthetic vertical sweep)
+    //   3. cursor available → cursor mode (rAF, real pointer drives effect)
     const apply = () => {
       stop();
       readColors();
-      if (isStatic()) {
+      if (reduceMQ.matches) {
+        cursorX = -9999;
+        cursorY = -9999;
+        pulseMode = false;
+        window.removeEventListener("pointermove", onPointerMove);
+        drawStatic();
+        return;
+      }
+      if (noHoverMQ.matches) {
+        pulseMode = true;
         cursorX = -9999;
         cursorY = -9999;
         window.removeEventListener("pointermove", onPointerMove);
-        drawStatic();
-      } else {
-        window.addEventListener("pointermove", onPointerMove, { passive: true });
         start();
+        return;
       }
+      pulseMode = false;
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      start();
     };
 
     resize();
@@ -170,7 +230,7 @@ export function HeroCanvas({ className }: { className?: string }) {
 
     const ro = new ResizeObserver(() => {
       resize();
-      if (isStatic()) drawStatic();
+      if (reduceMQ.matches) drawStatic();
     });
     ro.observe(container);
 
@@ -180,7 +240,7 @@ export function HeroCanvas({ className }: { className?: string }) {
 
     const themeObserver = new MutationObserver(() => {
       readColors();
-      if (isStatic()) drawStatic();
+      if (reduceMQ.matches) drawStatic();
     });
     themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -188,7 +248,7 @@ export function HeroCanvas({ className }: { className?: string }) {
     });
 
     const onVisibility = () => {
-      if (isStatic()) return;
+      if (reduceMQ.matches) return;
       if (document.hidden) stop();
       else start();
     };

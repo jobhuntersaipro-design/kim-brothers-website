@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s — Kim Brothers Ent.",
   },
   description:
-    "Automation, web, and scraping built for Malaysian SMEs. We build the systems that let you stop doing operational busywork.",
+    "We build the tools that take the boring work off your plate — chatbots, websites, scrapers, custom apps. Built for Malaysian SMEs.",
   applicationName: "Kim Brothers Ent.",
   authors: [{ name: "Kim Brothers Ent." }],
   creator: "Kim Brothers Ent.",
@@ -22,13 +22,13 @@ export const metadata: Metadata = {
     siteName: "Kim Brothers Ent.",
     title: "Kim Brothers Ent. — Focus on growing, not doing.",
     description:
-      "Automation, web, and scraping built for Malaysian SMEs.",
+      "We build the tools that take the boring work off your plate — chatbots, websites, scrapers, custom apps. Built for Malaysian SMEs.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Kim Brothers Ent.",
     description:
-      "Automation, web, and scraping built for Malaysian SMEs.",
+      "We build the tools that take the boring work off your plate — chatbots, websites, scrapers, custom apps. Built for Malaysian SMEs.",
   },
   alternates: { canonical: "/" },
 };

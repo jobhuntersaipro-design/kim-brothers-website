@@ -23,9 +23,9 @@ export function MicroLabel({
   return (
     <Tag
       className={cn(
-        "font-mono text-[var(--text-micro)] uppercase",
-        "tracking-[var(--tracking-micro)]",
-        accent ? "text-[var(--accent-ink)]" : "text-ink-mute",
+        "font-mono text-(--text-micro) uppercase",
+        "tracking-(--tracking-micro)",
+        accent ? "text-accent-ink" : "text-ink-mute",
         className,
       )}
     >

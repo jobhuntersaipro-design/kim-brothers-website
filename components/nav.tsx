@@ -84,7 +84,7 @@ export function Nav() {
             className={cn(
               "inline-flex items-center gap-2 rounded-(--radius) px-4 py-2",
               "border border-line-strong text-ink",
-              "font-mono text-[12px] uppercase tracking-[0.22em]",
+              "font-mono text-[12px] uppercase tracking-(--tracking-mono)",
               "transition-colors duration-(--dur-base) ease-out",
               // Hover fills with the brand accent — visible in both themes and
               // reinforces the WhatsApp CTA as the primary action.

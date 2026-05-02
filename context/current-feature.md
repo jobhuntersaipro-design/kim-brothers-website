@@ -8,9 +8,28 @@ For the full spec of any feature, see `context/features/[feature-name].md`.
 
 ## Active feature
 
-_None — ready to pick up the next one._
+### home-phase-3-sections — started 2026-04-30
+**Status:** In Progress
+**Spec:** [`context/features/home-phase-3-sections.md`](./features/home-phase-3-sections.md)
 
-First feature to pick up: `home-phase-3-sections.md`.
+Everything on `/` below the hero: services grid (4 cards + marketing strip), pipeline section (5-node animated diagram with auto-rotating variants), selected work (3 case-study cards), and a CTA band. Section dividers use the letter-spaced mono micro-label pattern.
+
+**Goals**
+- `ServicesGrid` — 4 cards (Automation, Web, Scraping, SaaS) + marketing as a full-width supporting strip; each card uses the ink-wipe hover from DESIGN.md §5 (500ms ease).
+- `PipelineSection` — 5 nodes connected by a hairline + traveling 5.2s accent pulse, auto-rotates through variants every 9s (stops on click). Variants: WhatsApp → AI → lead; scraper → dashboard → report; brief → site → live. Mobile collapses to 2-up, connectors hide.
+- `SelectedWork` — 3 featured case-study cards (Sofie, EasyStaff, Tisha's PO) with thumbnail demo, title, one-line description, category tag → `/work/[slug]` (will 404 until case-study phases ship — fine).
+- `CtaBand` — full-width "Ready to focus on growing?" h2 + WhatsApp CTA + secondary `/services` link.
+- Scroll reveals on each section (shared `useIntersectionObserver`, 0.8s fade + 14px rise per DESIGN.md §7), GPU-composited only.
+- Respect `prefers-reduced-motion: reduce` — no auto-rotation, no pulse, no reveal animation.
+- LCP stays ≤ 1.5s; new content can't compete with the hero for the LCP element. Lighthouse mobile ≥ 95.
+
+**Notes / constraints**
+- Services data → `lib/services.ts` (typed array). Pipeline variants → `lib/pipelines.ts`. Selected work uses (and may extend) `lib/cases.ts`.
+- Pipeline auto-rotate is a `setInterval` in `useEffect`, cleared on click; active index lives in `useState`.
+- Pipeline pulse is a single animated element per connector segment, `transform: translateX()` keyframe — no width/height/margin animation.
+- Each section is its own component (`ServicesGrid`, `PipelineSection`, `SelectedWork`, `CtaBand`); shared scroll-reveal lives in `components/hooks/use-intersection-observer.ts`.
+- Work card thumbnails are placeholder until case-study phases land — keep markup ready for real assets.
+- Out of scope: full `/services` page, full case-study pages, real thumbnails — those are separate features.
 
 ---
 
@@ -46,18 +65,17 @@ Notes:
 
 Build the 14 features in this order. Each links to its spec file in `context/features/`.
 
-1. **[home-phase-3-sections](./features/home-phase-3-sections.md)** — services grid, pipeline, selected work, CTA band
-2. **[services](./features/services.md)** — full services page
-3. **[work-index](./features/work-index.md)** — case study index with thumbnails
-4. **[case-study-phase-1-template](./features/case-study-phase-1-template.md)** — template + Sofie
-5. **[case-study-phase-2-remaining](./features/case-study-phase-2-remaining.md)** — BizzFlow → Ads
-6. **[about](./features/about.md)** — about page
-7. **[contact](./features/contact.md)** — contact form + Resend
-8. **[blog-phase-1-infra](./features/blog-phase-1-infra.md)** — MDX pipeline + first post
-9. **[blog-phase-2-posts](./features/blog-phase-2-posts.md)** — posts 2 and 3
-10. **[404](./features/404.md)** — custom error page
-11. **[seo-polish](./features/seo-polish.md)** — metadata, JSON-LD, sitemap, OG images across all pages
-12. **[launch](./features/launch.md)** — performance audit, reduced-motion, DNS cutover, GSC
+1. **[services](./features/services.md)** — full services page
+2. **[work-index](./features/work-index.md)** — case study index with thumbnails
+3. **[case-study-phase-1-template](./features/case-study-phase-1-template.md)** — template + Sofie
+4. **[case-study-phase-2-remaining](./features/case-study-phase-2-remaining.md)** — BizzFlow → Ads
+5. **[about](./features/about.md)** — about page
+6. **[contact](./features/contact.md)** — contact form + Resend
+7. **[blog-phase-1-infra](./features/blog-phase-1-infra.md)** — MDX pipeline + first post
+8. **[blog-phase-2-posts](./features/blog-phase-2-posts.md)** — posts 2 and 3
+9. **[404](./features/404.md)** — custom error page
+10. **[seo-polish](./features/seo-polish.md)** — metadata, JSON-LD, sitemap, OG images across all pages
+11. **[launch](./features/launch.md)** — performance audit, reduced-motion, DNS cutover, GSC
 
 ---
 

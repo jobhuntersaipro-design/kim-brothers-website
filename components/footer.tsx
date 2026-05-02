@@ -55,7 +55,7 @@ export function Footer() {
             <MicroLabel
               className="text-[color-mix(in_oklab,var(--cream-stable)_55%,transparent)]!"
             >
-              S I T E M A P
+              Sitemap
             </MicroLabel>
             <ul className="mt-5 space-y-3 text-[14px]">
               {SITEMAP.map((item) => (
@@ -80,7 +80,7 @@ export function Footer() {
             <MicroLabel
               className="text-[color-mix(in_oklab,var(--cream-stable)_55%,transparent)]!"
             >
-              S E R V I C E S
+              Services
             </MicroLabel>
             <ul className="mt-5 space-y-3 text-[14px]">
               {SERVICES.map((item) => (
@@ -105,7 +105,7 @@ export function Footer() {
             <MicroLabel
               className="text-[color-mix(in_oklab,var(--cream-stable)_55%,transparent)]!"
             >
-              C O N T A C T
+              Contact
             </MicroLabel>
             <ul className="mt-5 space-y-3 text-[14px]">
               <li>
@@ -154,7 +154,7 @@ export function Footer() {
             &copy; {year} Kim Brothers Ent. All rights reserved.
           </p>
           <p
-            className="font-mono uppercase tracking-[0.22em]"
+            className="font-mono uppercase tracking-(--tracking-mono)"
             style={{
               color: "color-mix(in oklab, var(--cream-stable) 55%, transparent)",
             }}

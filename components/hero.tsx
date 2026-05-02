@@ -5,21 +5,20 @@ import { HeroCanvas } from "@/components/hero-canvas";
 export function Hero() {
   return (
     <section
-      className="relative isolate overflow-hidden min-h-[min(900px,90svh)] flex items-center"
+      className="relative isolate flex min-h-[min(900px,90svh)] items-center overflow-hidden"
       aria-labelledby="hero-title"
     >
       <HeroCanvas />
       <Container className="relative z-10 py-(--section-pad-y)">
         <h1
           id="hero-title"
-          className="max-w-[18ch] font-display text-(length:--text-hero) tracking-(--tracking-hero)"
+          className="font-display max-w-[18ch] text-(length:--text-hero) tracking-(--tracking-hero)"
         >
           Focus on <span className="em-accent">growing</span>, not doing.
         </h1>
-        <p className="mt-6 max-w-[56ch] text-ink-2">
-          Kim Brothers builds the chatbots, websites, scrapers, and small apps
-          that take operational busywork off your plate. Built for Malaysian
-          SMEs.
+        <p className="text-ink-2 mt-6 max-w-[56ch]">
+          We build the tools that take the boring work off your plate, so you can focus on growing.
+          Chatbots, websites, scrapers, custom apps — whatever your business needs.
         </p>
         <div className="mt-10 flex flex-wrap gap-3">
           <Button

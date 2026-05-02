@@ -8,32 +8,28 @@ For the full spec of any feature, see `context/features/[feature-name].md`.
 
 ## Active feature
 
-### home-phase-3-sections — started 2026-04-30
-**Status:** In Progress
-**Spec:** [`context/features/home-phase-3-sections.md`](./features/home-phase-3-sections.md)
+_None — ready to pick up the next one._
 
-Everything on `/` below the hero: services grid (4 cards + marketing strip), pipeline section (5-node animated diagram with auto-rotating variants), selected work (3 case-study cards), and a CTA band. Section dividers use the letter-spaced mono micro-label pattern.
-
-**Goals**
-- `ServicesGrid` — 4 cards (Automation, Web, Scraping, SaaS) + marketing as a full-width supporting strip; each card uses the ink-wipe hover from DESIGN.md §5 (500ms ease).
-- `PipelineSection` — 5 nodes connected by a hairline + traveling 5.2s accent pulse, auto-rotates through variants every 9s (stops on click). Variants: WhatsApp → AI → lead; scraper → dashboard → report; brief → site → live. Mobile collapses to 2-up, connectors hide.
-- `SelectedWork` — 3 featured case-study cards (Sofie, EasyStaff, Tisha's PO) with thumbnail demo, title, one-line description, category tag → `/work/[slug]` (will 404 until case-study phases ship — fine).
-- `CtaBand` — full-width "Ready to focus on growing?" h2 + WhatsApp CTA + secondary `/services` link.
-- Scroll reveals on each section (shared `useIntersectionObserver`, 0.8s fade + 14px rise per DESIGN.md §7), GPU-composited only.
-- Respect `prefers-reduced-motion: reduce` — no auto-rotation, no pulse, no reveal animation.
-- LCP stays ≤ 1.5s; new content can't compete with the hero for the LCP element. Lighthouse mobile ≥ 95.
-
-**Notes / constraints**
-- Services data → `lib/services.ts` (typed array). Pipeline variants → `lib/pipelines.ts`. Selected work uses (and may extend) `lib/cases.ts`.
-- Pipeline auto-rotate is a `setInterval` in `useEffect`, cleared on click; active index lives in `useState`.
-- Pipeline pulse is a single animated element per connector segment, `transform: translateX()` keyframe — no width/height/margin animation.
-- Each section is its own component (`ServicesGrid`, `PipelineSection`, `SelectedWork`, `CtaBand`); shared scroll-reveal lives in `components/hooks/use-intersection-observer.ts`.
-- Work card thumbnails are placeholder until case-study phases land — keep markup ready for real assets.
-- Out of scope: full `/services` page, full case-study pages, real thumbnails — those are separate features.
+First feature to pick up: `services.md`.
 
 ---
 
 ## Finished features (reverse chronological)
+
+### home-phase-3-sections — shipped 2026-05-02
+Built the four sections below the hero on `/`: services grid (4 cards + marketing strip with ink-wipe hover), pipeline section (5-node animated diagram with synced accent pulse + auto-rotating Chatbot / Website / Daily report flows), selected work (3 case-study cards with placeholder SVG thumbs), and CTA band. Plus mobile hero auto-pulse, mono tracking pass, electric-blue favicon, route view-transitions.
+Commit: `e11dcd7`
+Notes:
+- Reveal hook drives state purely from the IntersectionObserver callback (an external signal), avoiding the `react-hooks/set-state-in-effect` rule. SSR markup stays visible without JS — `data-reveal` is only added after mount, which is also why above-the-fold content never flashes hidden.
+- Pipeline pulse + node-glow sync depends on the pulse-track being **full pipeline-track width** (`left: 0; right: 0`), not just the hairline range (10–90%). With the wider track, the pulse fades in exactly at Node 0 and out exactly after Node 4, matching the existing `var(--node-i) * 1.04s` glow delays. Cropping it back will silently desync the timing again.
+- Service-card ink wipe uses the **theme-flipping** `--ink`/`--cream` tokens (not the `-stable` variants) so the inverted state contrasts the resting card in both themes — dark wipe in light mode, cream wipe in dark mode.
+- HeroCanvas now picks one of three modes from media queries: reduced-motion → fully static; `(hover: none)` → pulse mode (synthetic vertical sweep every 5s, 90px band, no displacement); cursor available → original radial cursor reactivity. All share the same dot loop; only the is-affected predicate differs.
+- React 19.2 stable does not export `<ViewTransition>` (only React experimental does), but Next 16's `experimental.viewTransition: true` already wraps Link navigation in `document.startViewTransition()`. CSS `::view-transition-old/new(root)` shapes the timing — no JSX wrapper needed.
+- Mono letter-spacing pass: `--tracking-micro` is now `0.18em` (was `0.32em`), new `--tracking-mono: 0.12em` for body buttons/CTAs. All manual `S P A C E D` strings removed — the CSS does the spacing now. The original 0.32em compounded with manually-spaced text was unreadable.
+- No tech-stack labels anywhere on the home page (no respond.io, Make.com, Postgres, Vercel, etc.) per `pipeline-section-copy.md`. Those belong on the case-study pages.
+- Pipeline tabs are two-line: top = plain-language project type ("Chatbot" / "Website" / "Daily report"), bottom = flow caption (`MESSAGE → CUSTOMER` etc.). Order is locked: chatbot → website → daily report.
+- Case-study card thumbs are abstract SVG placeholders — to be swapped during the case-study phases.
+- Marked the v1 case-study card slots as Sofie / EasyStaff / Tisha's PO for visual diversity (chat / schedule / extract); all 7 case-study slugs and the locked order live in `lib/cases.ts`.
 
 ### home-phase-2-hero — shipped 2026-04-30
 Built the cursor-reactive dot grid canvas hero plus the content layer (h1 with italic accent on *growing*, supporting paragraph, WhatsApp + work CTAs). Eyebrow micro-label dropped before merge — the h1 carries enough weight on its own.
@@ -63,7 +59,7 @@ Notes:
 
 ## Up next (in order)
 
-Build the 14 features in this order. Each links to its spec file in `context/features/`.
+Each links to its spec file in `context/features/`.
 
 1. **[services](./features/services.md)** — full services page
 2. **[work-index](./features/work-index.md)** — case study index with thumbnails

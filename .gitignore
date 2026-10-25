@@ -50,4 +50,5 @@ Thumbs.db
 .playwright-mcp/
 *.png
 !public/**/*.png
-.claude
+.claude/*
+!.claude/settings.json
